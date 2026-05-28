@@ -96,7 +96,7 @@
 | 경로 | 설명 |
 |------|------|
 | [Report/01.MagicSqure_Problem-Definition-Report.md](Report/01.MagicSqure_Problem-Definition-Report.md) | STEP 1~5 전체 문제 정의 보고서 |
-| [Prompting/01.MagicSqure_Problem-Definition-Prompt.md.md](Prompting/01.MagicSqure_Problem-Definition-Prompt.md.md) | 문제 정의 단계 대화·프롬프트 기록 |
+| [Prompting/01.MagicSqure_Problem-Definition-Prompt.md](Prompting/01.MagicSqure_Problem-Definition-Prompt.md) | 문제 정의 단계 대화·프롬프트 기록 |
 
 상세한 관찰, 가정, 구조적 문제 분석, TDD 관점 논의는 **보고서**를 참고하세요.
 
