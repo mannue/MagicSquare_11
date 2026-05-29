@@ -4,7 +4,7 @@
 
 **MagicSquare_XX** 저장소에서 시작하는 것은 4×4 마방진 **도메인 구현**이 아니라, PRD(`docs/PRD_MagicSquare.md`)에 고정된 **입력/출력 계약·도메인 불변식·Dual-Track TDD·ECB(Clean Architecture)** 를 따라 **RED → GREEN → REFACTOR** 루프를 학습하는 TDD 실습입니다.
 
-**현재 단계:** AC-FR-01-01 shape suite RED 완료(Report/08) → **TDD GREEN 진행 중** (`stabilize/green` 브랜치). Track A **G-01**~**G-04** 완료(Boundary shape guard 전체 GREEN), **G-05**~**G-06** 대기.
+**현재 단계:** AC-FR-01-01 shape suite RED 완료(Report/08) → **TDD GREEN 진행 중** (`stabilize/green` 브랜치). Track A **G-01**~**G-04**·Track B **G-05**~**G-06** 완료 — **AC-FR-01-01 shape suite 전체 GREEN**.
 
 **RED 정의:** 실패하는 테스트를 작성하고, `pytest`로 실행한 뒤, **의도한 요구사항·규칙 위반 때문에** 실패했음을 확인하는 단계입니다. RED 확인 전 production 구현을 시작하지 않습니다.
 
@@ -198,11 +198,11 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 | **G-02** | Track A — `grid=[]` | 2 | ✅ GREEN | `grid is None or len(grid) != 4` → `INVALID_SIZE` |
 | **G-03** | Track A — 3×4 / 4×3 / 5×5 | 4 | ✅ GREEN | `all(len(row)==4 for row in grid)` 열 guard |
 | **G-04** | Track A — `[[]]*4` ragged | 2 | ✅ GREEN | G-03 열 guard로 커버 (`len(row) != 4`) |
-| **G-05** | Track B — Control + `None` 격리 | 4 (+fixture) | 🔴 ERROR | `src/control/use_cases/resolve_magic_square.py` — validator 선행, `resolve()` 0회 |
-| **G-06** | Track B — 나머지 shape 격리 | 4 | 🔴 ERROR | G-02~G-05 orchestration 재사용 |
+| **G-05** | Track B — Control + `None` 격리 | 4 (+fixture) | ✅ GREEN | `ResolveMagicSquareUseCase` — validator 선행, `resolve()` 0회 |
+| **G-06** | Track B — 나머지 shape 격리 | 5 | ✅ GREEN | G-05 orchestration 재사용 (invalid shape early return) |
 | *(메타)* | 범위/구조 검증 | 7 | ✅ PASS | 커밋 불필요 |
 
-**pytest 현황 (G-03 이후):** Boundary **20 PASS** / **0 FAIL** | Control **1 PASS** / **9 ERROR** | 합계 **21/30 PASS**
+**pytest 현황 (G-06 이후):** Boundary **20 PASS** | Control **10 PASS** | 합계 **30/30 PASS**
 
 ### GREEN 오름차순 전체 목록 (#01 ~ #26)
 
@@ -224,16 +224,16 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 | 14 | A | `TestAcFr0101MessageExactMatch` | `test_3x4_message_exact_match_prd_8_1` | 3×4 | (G-03과 동일) | G-03 ✅ |
 | 15 | A | `TestAcFr0101BoundaryValues` | `test_four_empty_rows_grid_returns_invalid_size_failure` | `[[]]*4` | `len(row) != 4` | G-04 ✅ |
 | 16 | A | `TestAcFr0101MessageExactMatch` | `test_four_empty_rows_message_exact_match_prd_8_1` | `[[]]*4` | (G-04와 동일) | G-04 ✅ |
-| 17 | B | — | *(fixture)* `resolve_use_case` | — | `src/control/...` 스캐폴드 | G-05 선행 |
-| 18 | B | `TestAcFr0101DomainIsolation` | `test_none_grid_resolve_call_count_is_zero` | `None` | `execute` → validator, `resolve()` 0회 | G-05 |
-| 19 | B | ↑ | `test_none_grid_use_case_returns_invalid_size_without_resolve` | `None` | 실패 응답 + spy | G-05 |
-| 20 | B | ↑ | `test_none_grid_run_domain_patch_assert_not_called` | `None` | `_run_domain` 미호출 | G-05 |
-| 21 | B | `TestAcFr0101ResolveContractIsolation` | `test_boundary_handles_none_before_resolve_invoked` | `None` | (G-05와 동일) | G-05 |
-| 22 | B | `TestAcFr0101DomainIsolation` | `test_empty_list_resolve_never_called` | `[]` | shape guard 연동 | G-06 |
-| 23 | B | ↑ | `test_3x4_grid_resolve_never_called` | 3×4 | (G-06과 동일) | G-06 |
-| 24 | B | `TestAcFr0101ResolveContractIsolation` | `test_4x3_grid_resolve_call_count_is_zero` | 4×3 | (G-06과 동일) | G-06 |
-| 25 | B | ↑ | `test_5x5_grid_resolve_never_called` | 5×5 | (G-06과 동일) | G-06 |
-| 26 | B | ↑ | `test_four_empty_rows_resolve_call_count_is_zero` | `[[]]*4` | (G-06과 동일) | G-06 |
+| 17 | B | — | *(fixture)* `resolve_use_case` | — | `src/control/...` 스캐폴드 | G-05 ✅ |
+| 18 | B | `TestAcFr0101DomainIsolation` | `test_none_grid_resolve_call_count_is_zero` | `None` | `execute` → validator, `resolve()` 0회 | G-05 ✅ |
+| 19 | B | ↑ | `test_none_grid_use_case_returns_invalid_size_without_resolve` | `None` | 실패 응답 + spy | G-05 ✅ |
+| 20 | B | ↑ | `test_none_grid_run_domain_patch_assert_not_called` | `None` | `_run_domain` 미호출 | G-05 ✅ |
+| 21 | B | `TestAcFr0101ResolveContractIsolation` | `test_boundary_handles_none_before_resolve_invoked` | `None` | (G-05와 동일) | G-05 ✅ |
+| 22 | B | `TestAcFr0101DomainIsolation` | `test_empty_list_resolve_never_called` | `[]` | shape guard 연동 | G-06 ✅ |
+| 23 | B | ↑ | `test_3x4_grid_resolve_never_called` | 3×4 | (G-06과 동일) | G-06 ✅ |
+| 24 | B | `TestAcFr0101ResolveContractIsolation` | `test_4x3_grid_resolve_call_count_is_zero` | 4×3 | (G-06과 동일) | G-06 ✅ |
+| 25 | B | ↑ | `test_5x5_grid_resolve_never_called` | 5×5 | (G-06과 동일) | G-06 ✅ |
+| 26 | B | ↑ | `test_four_empty_rows_resolve_call_count_is_zero` | `[[]]*4` | (G-06과 동일) | G-06 ✅ |
 
 **메타 7건 (커밋 불필요, 이미 PASS):** `test_scope_module_docstring_declares_ac_fr_01_01_only`, `test_scope_shape_suite_does_not_import_blank_finder`, `test_scope_shape_suite_does_not_import_solver`, `test_scope_no_valid_4x4_shape_failure_test_in_module`, `test_scope_ac_fr_01_02_to_05_cases_not_in_control_shape_module` 등 범위·구조 검증.
 
@@ -252,10 +252,10 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py -k "3x4 or 4
 # G-04 ✅
 python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py -k "four_empty_rows" -v
 
-# G-05
-python -m pytest tests/control/test_resolve_shape_guard_ac_fr_01_01.py -k "none_grid" -v
+# G-05 ✅
+python -m pytest tests/control/test_resolve_shape_guard_ac_fr_01_01.py -k "none_grid or boundary_handles_none" -v
 
-# G-06
+# G-06 ✅
 python -m pytest tests/control/test_resolve_shape_guard_ac_fr_01_01.py -k "empty_list or 3x4 or 4x3 or 5x5 or four_empty_rows" -v
 
 # 회귀 (AC-FR-01-01 shape suite 전체)
@@ -273,16 +273,16 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 - [x] TC-A-01: `grid=None` → 실패 결과 반환 — **G-01** ✅
 - [x] TC-A-02: `code == "INVALID_SIZE"` — **G-01** ✅
 - [x] TC-A-03: `message == "Grid must be 4x4."` 문자 단위 일치 — **G-01** ✅
-- [ ] TC-A-04: `grid=None` 시 Domain 진입점 0회 호출 — **G-05**
+- [x] TC-A-04: `grid=None` 시 Domain 진입점 0회 호출 — **G-05** ✅
 - [x] TC-A-05: `grid=[]` → 실패 — **G-02** ✅
 - [x] TC-A-06: 3×4 / 4×3 / 5×5 → 실패 — **G-03** ✅, `[[]]*4` ragged — **G-04** ✅
 - [x] TC-A-07: 반환 타입 `ValidationFailure` — **G-01** ✅
 
 ### Track B — Control / Domain 격리 (AC-FR-01-01)
 
-- [ ] TC-B-01: `resolve()`가 `None` grid를 직접 처리하지 않음 — **G-05**
-- [ ] TC-B-02: Boundary shape guard 후 `resolve()` 미호출 — **G-05**, **G-06**
-- [ ] TC-B-03: `resolve()` mock 호출 시 테스트 실패 — **G-05**, **G-06**
+- [x] TC-B-01: `resolve()`가 `None` grid를 직접 처리하지 않음 — **G-05** ✅
+- [x] TC-B-02: Boundary shape guard 후 `resolve()` 미호출 — **G-05** ✅, **G-06** ✅
+- [x] TC-B-03: `resolve()` mock 호출 시 테스트 실패 — **G-05** ✅, **G-06** ✅
 - [x] TC-B-04: AC-FR-01-02~05 범위 미포함 확인 (메타 테스트 PASS)
 
 ### 커버리지 목표 (G-06 완료 후 측정)
@@ -302,9 +302,11 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 - [x] DEF-008 해소 — `INVALID_SIZE_MESSAGE` 상수 (**G-01**)
 - [x] DEF-009 해소 — `ValidationFailure` pydantic 모델 (**G-01**)
 - [x] DEF-010 해소 — `validate(None)` 예외 없이 실패 반환 (**G-01**)
-- [ ] DEF-002, DEF-004, DEF-011 — **G-05**~**G-06** 대기
-- [ ] DEF-012 — shape suite GREEN 후 cov 재측정
-- [ ] 모든 결함 수정 후 회귀 테스트 통과 확인 (shape suite 25건 GREEN 목표)
+- [x] DEF-002 해소 — `src/control/` 스캐폴드 (**G-05**)
+- [x] DEF-004 해소 — validator 선행, shape 실패 시 `resolve()` 미호출 (**G-05**)
+- [x] DEF-011 해소 — invalid shape 전체 Domain 격리 (**G-06**)
+- [ ] DEF-012 — cov 재측정 (`pytest --cov=src`)
+- [x] 모든 결함 수정 후 회귀 테스트 통과 확인 (shape suite **30/30** GREEN)
 
 ---
 
@@ -360,16 +362,16 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 
 | 항목 | 상태 |
 |---|---|
-| **현재 단계** | AC-FR-01-01 **TDD GREEN 진행 중** — G-01~G-04 완료(Track A Boundary 전체 GREEN), G-05~G-06 대기 |
+| **현재 단계** | AC-FR-01-01 **shape suite GREEN 완료** (G-01~G-06) — FR-01~05 RED/GREEN 진행 대기 |
 | **브랜치** | `stabilize/green` |
-| **AC-FR-01-01 shape suite** | **21/30 PASS** (G-01~G-04: Boundary 20건 + 메타 5건 + Control 메타 1건; Control 9건 ERROR) |
-| **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`) — `grid is None`·`len(grid) != 4`·`all(len(row)==4)` shape guard |
-| **미구현** | `src/control/` (Track B), Entity rules |
+| **AC-FR-01-01 shape suite** | **30/30 PASS** (Boundary 20 + Control 10, 메타 7건 포함) |
+| **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`), `src/control/use_cases/resolve_magic_square.py` |
+| **미구현** | Entity rules (BlankFinder, Solver 등), FR-01~05 본격 GREEN |
 | **연습 스캐폴드** | `src/entity/models/user.py`, `tests/entity/test_user.py` (**마방진 범위 밖**) |
 | **FR-01~05 Skeleton** | `test_u_*_red.py`, `test_d_*_red.py` — 24건 `pytest.fail` (shape suite GREEN 후 진행) |
 | **미구성** | `pyproject.toml` 없음 — `python -m pytest` + `requirements.txt` |
-| **다음 GREEN 커밋** | **G-05** — `ResolveMagicSquareUseCase` 스캐폴드 + validator 선행, `resolve()` 0회 |
+| **다음 GREEN 커밋** | **FR-01~05** — `test_u_*_red.py`·`test_d_*_red.py` RED 확인 후 Entity/Boundary GREEN |
 
 ---
 
-*README 갱신: AC-FR-01-01 GREEN G-03(3×4/4×3/5×5 열 guard) 완료 반영. G-04 ragged는 동일 guard로 GREEN. Tracking Board Status는 RED `RED-CONFIRMED` → GREEN `GREEN` → REFACTOR `DONE`으로 갱신합니다.*
+*README 갱신: AC-FR-01-01 GREEN G-05(Control validator 선행·Domain 격리) 완료 반영. G-06은 동일 orchestration으로 shape suite 30/30 GREEN.*
