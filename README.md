@@ -4,7 +4,7 @@
 
 **MagicSquare_XX** 저장소에서 시작하는 것은 4×4 마방진 **도메인 구현**이 아니라, PRD(`docs/PRD_MagicSquare.md`)에 고정된 **입력/출력 계약·도메인 불변식·Dual-Track TDD·ECB(Clean Architecture)** 를 따라 **RED → GREEN → REFACTOR** 루프를 학습하는 TDD 실습입니다.
 
-**현재 단계:** AC-FR-01-01 **shape suite + 품질 게이트 완료** (`stabilize/green`). G-01~G-06 GREEN · DEF-012 cov gate PASS — **FR-01~05 RED/GREEN 진행 대기**.
+**현재 단계:** FR-01~05 **Full RED 완료** (`stabilize/green`). AC-FR-01-01 G-01~G-06 GREEN · DEF-012 cov gate PASS — **FR-01~05 GREEN** 다음.
 
 **RED 정의:** 실패하는 테스트를 작성하고, `pytest`로 실행한 뒤, **의도한 요구사항·규칙 위반 때문에** 실패했음을 확인하는 단계입니다. RED 확인 전 production 구현을 시작하지 않습니다.
 
@@ -281,6 +281,60 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 
 ---
 
+## FR-01~05 Full RED 로드맵
+
+> **기준 스위트:** `test_u_*_red.py` + `test_d_*_red.py` = **24건** (Report/10 Skeleton → Report/14 Full RED)  
+> **선행:** RPT-09 (설계표), RPT-10 (Skeleton), AC-FR-01-01 shape suite **30/30 PASS**  
+> **상수 SSOT:** `tests/conftest.py` — G0~G3, `E_INVALID_BLANK_COUNT` / `E_INVALID_VALUE_RANGE` / `E_DUPLICATE_NON_ZERO` (PRD §13)
+
+### Full RED 전환 현황
+
+| Track | Test ID | 파일 | 건수 | Expected RED Failure | 상태 |
+|---|---|---|---:|---|---|
+| A | U-IN-07~08, 04, 06, 05 | `tests/boundary/test_u_in_red.py` | 5 | `NotImplementedError` (validator shape 이후) | ✅ Full RED |
+| A | U-OUT-01~03 | `tests/boundary/test_u_out_red.py` | 3 | `ModuleNotFoundError` (`solve_partial_magic_square`) | ✅ Full RED |
+| A | U-FLOW-02 ×3 | `tests/control/test_u_flow_02_red.py` | 3 | `NotImplementedError` | ✅ Full RED |
+| B | D-LOC-01 | `tests/entity/test_d_loc_red.py` | 1 | `ModuleNotFoundError` (`src.entity.rules`) | ✅ Full RED |
+| B | D-MIS-01 | `tests/entity/test_d_mis_red.py` | 1 | `ModuleNotFoundError` | ✅ Full RED |
+| B | D-VAL-01~06 | `tests/entity/test_d_val_red.py` | 7 | `ModuleNotFoundError` | ✅ Full RED |
+| B | D-SOL-01~04 | `tests/control/test_d_sol_red.py` | 4 | `ModuleNotFoundError` | ✅ Full RED |
+
+**pytest 현황 (Full RED 이후):** FR-01~05 **24 FAILED** (의도 RED) | AC-FR-01-01 shape **30/30 PASS** (회귀 유지)
+
+### G0~G3 Given SSOT (`tests/conftest.py`)
+
+| ID | 용도 | 기대 출력 (GREEN) |
+|---|---|---|
+| **G0** | 완전 마방진 | `is_magic_square` = true |
+| **G1** | Step A 성공 | `[2,2,7,3,3,10]` |
+| **G2** | reverse 성공 | `[2,2,10,3,3,7]` |
+| **G3** | 양 조합 실패 | `UnsolvableDomainError` |
+
+### GREEN 착수 순서 (권장)
+
+| 순서 | 대상 | 구현 요약 |
+|---:|---|---|
+| 1 | U-IN-07/08 | `validator.py` — blank count == 2 → `E_INVALID_BLANK_COUNT` |
+| 2 | U-IN-04~06 | value range / duplicate → `E_INVALID_VALUE_RANGE`, `E_DUPLICATE_NON_ZERO` |
+| 3 | U-FLOW-02 | invalid 입력 시 `resolve()` 0회 (validator 연동) |
+| 4 | D-LOC, D-MIS | `src/entity/rules/` — blank / missing finder |
+| 5 | D-VAL-01~06 | `is_magic_square` |
+| 6 | D-SOL, U-OUT | `solve_partial_magic_square.solution` + 출력 계약 |
+
+```bash
+# FR-01~05 Full RED 스위트
+python -m pytest tests/boundary/test_u_in_red.py tests/boundary/test_u_out_red.py \
+  tests/control/test_u_flow_02_red.py tests/entity/test_d_loc_red.py \
+  tests/entity/test_d_mis_red.py tests/entity/test_d_val_red.py \
+  tests/control/test_d_sol_red.py -v
+
+# shape suite 회귀 (반드시 30/30 유지)
+python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py \
+  tests/control/test_resolve_shape_guard_ac_fr_01_01.py -q
+```
+
+---
+
 ## RED / GREEN To-Do 리스트
 
 > RED 체크리스트: @docs/test_plan.md 기반. GREEN 진행 시 아래 **G-** 커밋 번호와 연동합니다.
@@ -294,6 +348,17 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 - [x] TC-A-05: `grid=[]` → 실패 — **G-02** ✅
 - [x] TC-A-06: 3×4 / 4×3 / 5×5 → 실패 — **G-03** ✅, `[[]]*4` ragged — **G-04** ✅
 - [x] TC-A-07: 반환 타입 `ValidationFailure` — **G-01** ✅
+
+### Track A — Boundary (FR-01~05 Full RED)
+
+- [x] FR-RED-01: Skeleton 24건 `pytest.fail` 작성 (RPT-10) ✅
+- [x] FR-RED-02: `conftest.py` G0~G3 + PRD §13 오류 코드 상수 ✅
+- [x] FR-RED-03: U-IN-07~08, 04, 06, 05 Full RED assert (5건) ✅
+- [x] FR-RED-04: U-FLOW-02 Full RED + domain spy (3건) ✅
+- [x] FR-RED-05: U-OUT-01~03 Full RED (3건) ✅
+- [x] FR-RED-06: D-LOC, D-MIS, D-VAL, D-SOL Full RED (13건) ✅
+- [x] FR-RED-07: shape suite 30/30 회귀 PASS 유지 ✅
+- [ ] FR-GREEN-01: U-IN-07/08 blank count 구현 — **다음**
 
 ### Track B — Control / Domain 격리 (AC-FR-01-01)
 
@@ -358,6 +423,11 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 | `.coveragerc` | pytest-cov omit/exclude — `user.py` 스캐폴드 제외 |
 | `docs/test_plan.md` | AC-FR-01-01 테스트 계획서 |
 | `Report/08.MagicSquare_AC-FR-01-01-RED-Test-and-Defect_Report.md` | AC-FR-01-01 RED 테스트·결함 등록 실행 보고 |
+| `Report/13.MagicSquare_AC-FR-01-01-Quality-Gate-DEF-012_Report.md` | AC-FR-01-01 DEF-012 cov gate 완료 보고 |
+| `Report/10.MagicSquare_FR-01-05_RED-Skeleton_Report.md` | FR-01~05 RED Skeleton (`pytest.fail`, 24건) |
+| `Report/14.MagicSquare_FR-01-05-Full-RED_Report.md` | FR-01~05 Full RED assert 전환 (24건) |
+| `Prompt/14.MagicSquare_FR-01-05-Full-RED_Prompt-Transcript.md` | Full RED 세션 Transcript |
+| `Report/09.MagicSquare_FR-01-05_Dual-Track-RED-Design_Report.md` | FR-01~05 Dual-Track RED 설계표 |
 | `Report/12.MagicSquare_AC-FR-01-01-GREEN-None-Grid_Report.md` | AC-FR-01-01 GREEN G-01 (`grid=None`) 실행 보고 |
 | `Prompt/08.MagicSquare_AC-FR-01-01-RED-Test-and-Defect_Prompt-Transcript.md` | RED 세션 Transcript |
 | `Prompt/12.MagicSquare_AC-FR-01-01-GREEN-None-Grid_Prompt-Transcript.md` | GREEN G-01 세션 Transcript |
@@ -381,17 +451,18 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 
 | 항목 | 상태 |
 |---|---|
-| **현재 단계** | AC-FR-01-01 **완료** (G-01~G-06 + DEF-012 cov gate) — **FR-01~05 RED/GREEN** 다음 |
+| **현재 단계** | FR-01~05 **Full RED 완료** — **GREEN** (U-IN-07/08 blank count) 다음 |
 | **브랜치** | `stabilize/green` |
 | **AC-FR-01-01 shape suite** | **30/30 PASS** (Boundary 20 + Control 10, 메타 7건 포함) |
+| **FR-01~05 Full RED** | **24/24 FAILED** (의도 RED — `NotImplementedError` 8건, `ModuleNotFoundError` 16건) |
 | **품질 게이트** | Boundary **100%** · Control **87%** · in-scope **94%** (`--cov-fail-under=85` PASS) |
 | **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`), `src/control/use_cases/resolve_magic_square.py`, `.coveragerc` |
-| **미구현** | Entity rules (BlankFinder, Solver 등), FR-01~05 본격 GREEN |
+| **미구현** | `validator` blank/range/duplicate, `src/entity/rules/`, `solve_partial_magic_square` |
 | **연습 스캐폴드** | `src/entity/models/user.py`, `tests/entity/test_user.py` (**마방진 범위 밖**) |
-| **FR-01~05 Skeleton** | `test_u_*_red.py`, `test_d_*_red.py` — 24건 `pytest.fail` (shape suite GREEN 후 진행) |
+| **conftest SSOT** | G0~G3 fixture, PRD §13 오류 코드·격자 헬퍼 활성화 |
 | **미구성** | `pyproject.toml` 없음 — `python -m pytest` + `requirements.txt` |
-| **다음 GREEN 커밋** | **FR-01~05** — `test_u_*_red.py`·`test_d_*_red.py` RED 확인 후 Entity/Boundary GREEN |
+| **다음 GREEN 커밋** | **U-IN-07/08** — `validator.py` blank count → `E_INVALID_BLANK_COUNT` |
 
 ---
 
-*README 갱신: AC-FR-01-01 품질 게이트(DEF-012) 완료 — `.coveragerc` 추가, Boundary 100% / in-scope 94%, cov gate PASS.*
+*README 갱신: FR-01~05 Full RED 완료 (RPT-14) — Skeleton 24건 assert 전환, shape suite 30/30 회귀 유지.*
