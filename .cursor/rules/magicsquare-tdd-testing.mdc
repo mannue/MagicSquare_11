@@ -1,0 +1,64 @@
+# MagicSquare TDD and Testing Rules
+
+## TDD Flow
+
+### RED Phase
+- Add a failing test before implementation for each new feature or bug fix.
+- Confirm failure reason matches the intended requirement.
+- Do not start implementation until RED is explicitly confirmed.
+
+### GREEN Phase
+- Write only the minimum code needed to pass the failing test.
+- Keep implementation scope limited to the current test requirement.
+- Run impacted tests to confirm no regressions.
+
+### REFACTOR Phase
+- Improve structure without changing observable behavior.
+- Focus on duplication removal, naming clarity, and modularization.
+- Re-run tests after refactoring and keep coverage thresholds.
+
+## Testing Conventions
+- Framework: `pytest`
+- Pattern: AAA (Arrange, Act, Assert)
+- Naming: test files/functions must use `test_` prefix
+
+## Fixture Scope Rules
+- Default scope: `function`
+- Integration scope: `module`
+- Expensive resources: `session`
+- Use the narrowest possible scope and prevent state leakage between tests.
+
+## Coverage and Safety
+- Keep minimum coverage at or above 80%.
+- Do not weaken assertions or bypass tests just to reach GREEN.
+---
+description: Dual-Track TDD flow and pytest testing standards
+globs: "{src,tests}/**/*.py"
+alwaysApply: false
+---
+
+# TDD and Testing Rules
+
+## RED
+- Add a failing test before production code for each new requirement or bug fix.
+- Confirm the failure matches the intended requirement exactly.
+- Do not move to implementation before validating RED.
+
+## GREEN
+- Write the smallest implementation that makes the current failing test pass.
+- Limit implementation scope to the current test requirement.
+- Run relevant tests to confirm no regression.
+- Do not refactor or pre-optimize in GREEN.
+
+## REFACTOR
+- Improve internal structure without changing observable behavior.
+- Focus on deduplication, naming, and modularity.
+- Re-run tests after refactoring and preserve assertion strength.
+- Do not add new features in this phase.
+
+## Pytest Standards
+- Framework: `pytest`
+- Pattern: AAA (Arrange-Act-Assert)
+- Coverage minimum: 80%
+- Naming: tests must use `test_` prefix
+- Fixture scope defaults to the narrowest valid scope (`function` by default)

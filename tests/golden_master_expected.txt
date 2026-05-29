@@ -1,0 +1,52 @@
+[normal_success]
+Input:
+1 14 15 4
+12 0 6 9
+8 11 0 5
+13 2 3 16
+Output:
+[2,2,7,3,3,10]
+
+________________________________________
+
+[reverse_success]
+Input:
+16 3 2 13
+5 0 11 8
+9 6 0 12
+4 15 14 1
+Output:
+[2,2,10,3,3,7]
+
+________________________________________
+
+[invalid_blank_count]
+Input:
+16 3 2 13
+5 10 11 8
+9 6 7 12
+4 15 14 1
+Error:
+E_INVALID_BLANK_COUNT
+
+________________________________________
+
+[duplicate_number]
+Input:
+6 14 15 4
+12 0 6 9
+8 11 0 5
+13 2 3 16
+Error:
+E_DUPLICATE_NON_ZERO
+
+________________________________________
+
+[no_valid_solution]
+Input:
+3 16 2 13
+5 0 11 8
+9 6 0 12
+4 15 14 1
+Error:
+UnsolvableDomainError
