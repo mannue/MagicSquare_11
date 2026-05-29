@@ -15,3 +15,9 @@ class ValidationFailure(BaseModel):
 
     success: bool = False
     error: BoundaryErrorDetail
+
+
+class ValidationSuccess(BaseModel):
+    """Successful validation result returned by BoundaryValidator."""
+
+    success: bool = True

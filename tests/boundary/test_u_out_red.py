@@ -38,7 +38,7 @@ class TestUOutSuccessContract:
         result = _solve(grid)
         # Then — FR-05, BR-10
         assert result == G1_EXPECTED_SOLUTION
-        assert all(1 <= result[i] <= 4 for i in (0, 1, 2, 4, 5))
+        assert all(1 <= result[i] <= 4 for i in (0, 1, 3, 4))
 
     def test_u_out_03_success_tuple_field_order(
         self, grid_g1: list[list[int]]

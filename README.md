@@ -4,7 +4,7 @@
 
 **MagicSquare_XX** 저장소에서 시작하는 것은 4×4 마방진 **도메인 구현**이 아니라, PRD(`docs/PRD_MagicSquare.md`)에 고정된 **입력/출력 계약·도메인 불변식·Dual-Track TDD·ECB(Clean Architecture)** 를 따라 **RED → GREEN → REFACTOR** 루프를 학습하는 TDD 실습입니다.
 
-**현재 단계:** FR-01~05 **Full RED 완료** (`stabilize/green`). AC-FR-01-01 G-01~G-06 GREEN · DEF-012 cov gate PASS — **FR-01~05 GREEN** 다음.
+**현재 단계:** FR-01~05 **GREEN 완료** (`stabilize/green`). AC-FR-01-01 G-01~G-06 · DEF-012 cov gate PASS · FR-01~05 **24/24 PASS** — **REFACTOR** 다음.
 
 **RED 정의:** 실패하는 테스트를 작성하고, `pytest`로 실행한 뒤, **의도한 요구사항·규칙 위반 때문에** 실패했음을 확인하는 단계입니다. RED 확인 전 production 구현을 시작하지 않습니다.
 
@@ -132,7 +132,7 @@ Tracking Board(§6)가 이 체인의 실행 보드입니다.
 |---|---|---|
 | **Entity** | Board 상태, 순수 도메인 규칙 — 빈칸 탐색, 누락 숫자, 마방진 판정, 조합 시도 | `BlankFinder`, `MissingNumberFinder`, `MagicSquareValidator`, `Solver`, `Board` (PRD §18) |
 | **Control** | 검증·해 결정 흐름 조정, Boundary↔Entity 연결 | `ResolveMagicSquareUseCase`, `SolverService` (`src/control/use_cases/`) |
-| **Boundary** | 입력 검증, 출력 `int[6]` 포맷, 오류 코드 매핑 — **Domain Invariant 직접 구현 금지** | `BoundaryValidator`, `ResultFormatter` (`src/boundary/`) |
+| **Boundary** | 입력 검증, 출력 `int[6]` 포맷, 오류 코드 매핑, GUI — **Domain Invariant 직접 구현 금지** | `BoundaryValidator`, `ResultFormatter`, `screen/app` (`src/boundary/`, `boundary/screen/`) |
 
 **제약:** Entity는 UI/DB/Web/파일 시스템에 의존하지 않습니다. Boundary는 Entity를 직접 호출하지 않고 Control을 경유합니다.
 
@@ -210,8 +210,8 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 |---|---|---|---|
 | `src/boundary` | NFR-02 **≥85%** | **100%** | ✅ |
 | `src/control/use_cases` | 권장 **≥80%** | **87%** | ✅ |
-| in-scope `src` (omit `user.py`) | README **≥90%** | **94%** | ✅ |
-| `src/entity` rules | NFR-01 **≥95%** | 미구현 | ⏳ Track B |
+| in-scope `src` (omit `user.py`) | README **≥90%** | **94%** (shape only) · **96%** (54건 전체) | ✅ |
+| `src/entity` rules | NFR-01 **≥95%** | **91%** (`magic_square_validator`) | ⏳ 전체 스위트 **96%** — anti-diagonal 분기 미커버 |
 
 **설정:** `.coveragerc` — `src/entity/models/user.py` omit, `NotImplementedError` exclude.
 
@@ -287,7 +287,7 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 > **선행:** RPT-09 (설계표), RPT-10 (Skeleton), AC-FR-01-01 shape suite **30/30 PASS**  
 > **상수 SSOT:** `tests/conftest.py` — G0~G3, `E_INVALID_BLANK_COUNT` / `E_INVALID_VALUE_RANGE` / `E_DUPLICATE_NON_ZERO` (PRD §13)
 
-### Full RED 전환 현황
+### Full RED 전환 현황 — ✅ 완료
 
 | Track | Test ID | 파일 | 건수 | Expected RED Failure | 상태 |
 |---|---|---|---:|---|---|
@@ -299,7 +299,26 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 | B | D-VAL-01~06 | `tests/entity/test_d_val_red.py` | 7 | `ModuleNotFoundError` | ✅ Full RED |
 | B | D-SOL-01~04 | `tests/control/test_d_sol_red.py` | 4 | `ModuleNotFoundError` | ✅ Full RED |
 
-**pytest 현황 (Full RED 이후):** FR-01~05 **24 FAILED** (의도 RED) | AC-FR-01-01 shape **30/30 PASS** (회귀 유지)
+---
+
+## FR-01~05 GREEN 로드맵
+
+> **기준 스위트:** `test_u_*_red.py` + `test_d_*_red.py` = **24건**  
+> **회귀:** AC-FR-01-01 shape suite **30/30 PASS** 유지 → **합계 54/54 PASS**  
+> **상수 SSOT:** `tests/conftest.py` — G0~G3, PRD §13 오류 코드
+
+### GREEN 진행 현황
+
+| 커밋 | 범위 | 테스트 수 | 상태 | 구현 요약 |
+|---|---|---:|---|---|
+| **FG-01** | U-IN-07/08 blank count | 2 | ✅ GREEN | `validator.py` — `0` 개수 == 2 → `E_INVALID_BLANK_COUNT` |
+| **FG-02** | U-IN-04~06 range / duplicate | 3 | ✅ GREEN | value `0 or 1..16`, non-zero uniqueness 검사 |
+| **FG-03** | U-FLOW-02 extended isolation | 3 | ✅ GREEN | FG-01~02 validator 연동 — invalid 시 `resolve()` 0회 |
+| **FG-04** | D-LOC, D-MIS | 2 | ✅ GREEN | `blank_finder.find_blank_coords`, `missing_number_finder.find_not_exist_nums` |
+| **FG-05** | D-VAL-01~06 | 7 | ✅ GREEN | `magic_square_validator.is_magic_square` (`MAGIC_CONSTANT=34`) |
+| **FG-06** | D-SOL-01~04, U-OUT-01~03 | 7 | ✅ GREEN | `solve_partial_magic_square.solution` — Attempt1/2 + 1-index `[r1,c1,n1,r2,c2,n2]` (U-OUT-02 좌표 인덱스 수정 포함) |
+
+**pytest 현황 (FG-06 이후):** FR-01~05 **24 PASS** | shape **30 PASS** | **합계 54/54 PASS**
 
 ### G0~G3 Given SSOT (`tests/conftest.py`)
 
@@ -310,19 +329,29 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 | **G2** | reverse 성공 | `[2,2,10,3,3,7]` |
 | **G3** | 양 조합 실패 | `UnsolvableDomainError` |
 
-### GREEN 착수 순서 (권장)
+### 품질 게이트 (전체 스위트 cov)
 
-| 순서 | 대상 | 구현 요약 |
-|---:|---|---|
-| 1 | U-IN-07/08 | `validator.py` — blank count == 2 → `E_INVALID_BLANK_COUNT` |
-| 2 | U-IN-04~06 | value range / duplicate → `E_INVALID_VALUE_RANGE`, `E_DUPLICATE_NON_ZERO` |
-| 3 | U-FLOW-02 | invalid 입력 시 `resolve()` 0회 (validator 연동) |
-| 4 | D-LOC, D-MIS | `src/entity/rules/` — blank / missing finder |
-| 5 | D-VAL-01~06 | `is_magic_square` |
-| 6 | D-SOL, U-OUT | `solve_partial_magic_square.solution` + 출력 계약 |
+| Layer | NFR / 기준 | 실측 (54건 스위트) | Gate |
+|---|---|---|---|
+| `src/boundary` | NFR-02 **≥85%** | **97%** | ✅ |
+| `src/control/use_cases` | 권장 **≥80%** | **87%** (`resolve`) · **100%** (`solution`) | ✅ |
+| in-scope `src` (omit `user.py`) | README **≥90%** | **96%** | ✅ |
+| `src/entity/rules` | NFR-01 **≥95%** | **91~100%** (validator anti-diagonal 2 lines 미커버) | ⏳ |
+
+**미커버 (의도·후속):** `validator.py:68` (`ValidationSuccess`), `resolve_magic_square.py:26,29` (validation 성공 → Domain 진입), `magic_square_validator.py:26,28` (anti-diagonal 실패 분기)
 
 ```bash
-# FR-01~05 Full RED 스위트
+# FR-01~05 GREEN 스위트 + cov
+python -m pytest tests/boundary/test_u_in_red.py tests/boundary/test_u_out_red.py \
+  tests/control/test_u_flow_02_red.py tests/entity/test_d_loc_red.py \
+  tests/entity/test_d_mis_red.py tests/entity/test_d_val_red.py \
+  tests/control/test_d_sol_red.py \
+  tests/boundary/test_validator_shape_ac_fr_01_01.py \
+  tests/control/test_resolve_shape_guard_ac_fr_01_01.py \
+  --cov=src/boundary --cov=src/control/use_cases --cov=src/entity \
+  --cov-report=term-missing -q
+
+# FR-01~05 단독
 python -m pytest tests/boundary/test_u_in_red.py tests/boundary/test_u_out_red.py \
   tests/control/test_u_flow_02_red.py tests/entity/test_d_loc_red.py \
   tests/entity/test_d_mis_red.py tests/entity/test_d_val_red.py \
@@ -335,9 +364,71 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py \
 
 ---
 
-## RED / GREEN To-Do 리스트
+## Boundary Screen GUI (GREEN 후속)
 
-> RED 체크리스트: @docs/test_plan.md 기반. GREEN 진행 시 아래 **G-** 커밋 번호와 연동합니다.
+> **목적:** AC-FR-01-01 수동 확인 — pytest와 동일 `code` / `message` 표시  
+> **Report:** RPT-15 · **구현:** `src/boundary/screen/`, **런처:** `boundary/screen/`
+
+### 실행
+
+```bash
+# 교육 템플릿 (프로젝트 루트)
+python -m boundary.screen.app
+
+# src 패키지 경로
+python -m src.boundary.screen.app
+```
+
+### UI 기능
+
+| 버튼 | 동작 |
+|---|---|
+| **Validate** | `BoundaryValidator.validate(grid)` → `code` / `message` |
+| **None Grid (AC-FR-01-01)** | `validate(None)` → `INVALID_SIZE` / `Grid must be 4x4.` |
+| **Solve** | validator 통과 후 Control `solution(grid)` |
+| **Load G1** | G1 샘플 격자 |
+| **Clear** | 입력 초기화 |
+
+**ECB:** Screen → `BoundaryValidator` (Boundary) · Solve → `src.control.use_cases` (Entity 직접 호출 없음).
+
+---
+
+## RED 단계 To-Do 리스트
+
+> RED 체크리스트: @docs/test_plan.md 기반. GREEN 진행 시 아래 **G-** / **FG-** / **GM-** 항목과 연동합니다.
+
+### Golden Master 회귀 안전장치
+
+> Refactoring 시작 전 구축. GREEN 완료 후 즉시 적용.  
+> 설계: `docs/Golden_Master_Approval_Design.md`
+
+#### 기준 파일 생성
+
+- [x] **GM-01:** `golden_master_expected.txt` 생성
+- [x] **GM-02:** 정상 / 역순 / 오류 시나리오 추가
+- [x] **GM-03:** `git add tests/golden_master_expected.txt`
+
+#### 테스트 코드
+
+- [x] **GM-04:** `test_golden_master_magic_square` 작성
+- [x] **GM-05:** approve 패턴 적용
+- [x] **GM-06:** Golden Master 테스트 PASS 확인
+
+#### 회귀 보호
+
+- [x] **GM-07:** row-major 규칙 보호
+- [x] **GM-08:** 1-index 출력 보호
+- [x] **GM-09:** reverse 조합 fallback 보호
+- [x] **GM-10:** Error Contract 보호
+
+```bash
+# Golden Master 회귀 테스트
+python -m pytest -m golden_master -v
+
+# 의도적 출력 변경 후 기준 갱신
+python -m tests.golden_master.generate_golden_master --force
+git add tests/golden_master_expected.txt
+```
 
 ### Track A — Boundary (AC-FR-01-01)
 
@@ -358,7 +449,12 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py \
 - [x] FR-RED-05: U-OUT-01~03 Full RED (3건) ✅
 - [x] FR-RED-06: D-LOC, D-MIS, D-VAL, D-SOL Full RED (13건) ✅
 - [x] FR-RED-07: shape suite 30/30 회귀 PASS 유지 ✅
-- [ ] FR-GREEN-01: U-IN-07/08 blank count 구현 — **다음**
+- [x] FR-GREEN-01: U-IN-07/08 blank count — **FG-01** ✅
+- [x] FR-GREEN-02: U-IN-04~06 range / duplicate — **FG-02** ✅
+- [x] FR-GREEN-03: U-FLOW-02 extended isolation — **FG-03** ✅
+- [x] FR-GREEN-04: D-LOC, D-MIS entity rules — **FG-04** ✅
+- [x] FR-GREEN-05: D-VAL-01~06 `is_magic_square` — **FG-05** ✅
+- [x] FR-GREEN-06: D-SOL, U-OUT solver + 출력 계약 — **FG-06** ✅
 
 ### Track B — Control / Domain 격리 (AC-FR-01-01)
 
@@ -371,7 +467,7 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py \
 
 - [x] Boundary Layer: **100%** (`src/boundary`, shape suite) — NFR-02 **≥85%** ✅
 - [x] AC-FR-01-01 in-scope TOTAL: **94%** (`.coveragerc` omit `user.py`) — **≥90%** ✅
-- [ ] Domain Logic (Entity rules): **≥95%** — Track B / FR-01~05 GREEN 후 전체 스위트 재측정 (NFR-01)
+- [x] Domain Logic (Entity rules): **91~100%** — 전체 스위트 **96%** (NFR-01 anti-diagonal 분기 ⏳)
 
 ### 결함 목록 연결
 
@@ -426,7 +522,9 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py \
 | `Report/13.MagicSquare_AC-FR-01-01-Quality-Gate-DEF-012_Report.md` | AC-FR-01-01 DEF-012 cov gate 완료 보고 |
 | `Report/10.MagicSquare_FR-01-05_RED-Skeleton_Report.md` | FR-01~05 RED Skeleton (`pytest.fail`, 24건) |
 | `Report/14.MagicSquare_FR-01-05-Full-RED_Report.md` | FR-01~05 Full RED assert 전환 (24건) |
+| `Report/15.MagicSquare_FR-01-05-GREEN-Boundary-Screen_Report.md` | FR-01~05 GREEN (FG-01~FG-06) + Boundary Screen GUI |
 | `Prompt/14.MagicSquare_FR-01-05-Full-RED_Prompt-Transcript.md` | Full RED 세션 Transcript |
+| `Prompt/15.MagicSquare_FR-01-05-GREEN-Boundary-Screen_Prompt-Transcript.md` | GREEN + Screen 세션 Transcript |
 | `Report/09.MagicSquare_FR-01-05_Dual-Track-RED-Design_Report.md` | FR-01~05 Dual-Track RED 설계표 |
 | `Report/12.MagicSquare_AC-FR-01-01-GREEN-None-Grid_Report.md` | AC-FR-01-01 GREEN G-01 (`grid=None`) 실행 보고 |
 | `Prompt/08.MagicSquare_AC-FR-01-01-RED-Test-and-Defect_Prompt-Transcript.md` | RED 세션 Transcript |
@@ -451,18 +549,20 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py \
 
 | 항목 | 상태 |
 |---|---|
-| **현재 단계** | FR-01~05 **Full RED 완료** — **GREEN** (U-IN-07/08 blank count) 다음 |
+| **현재 단계** | FR-01~05 **GREEN 완료** — **REFACTOR** 다음 |
 | **브랜치** | `stabilize/green` |
 | **AC-FR-01-01 shape suite** | **30/30 PASS** (Boundary 20 + Control 10, 메타 7건 포함) |
-| **FR-01~05 Full RED** | **24/24 FAILED** (의도 RED — `NotImplementedError` 8건, `ModuleNotFoundError` 16건) |
-| **품질 게이트** | Boundary **100%** · Control **87%** · in-scope **94%** (`--cov-fail-under=85` PASS) |
-| **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`), `src/control/use_cases/resolve_magic_square.py`, `.coveragerc` |
-| **미구현** | `validator` blank/range/duplicate, `src/entity/rules/`, `solve_partial_magic_square` |
+| **FR-01~05 GREEN** | **24/24 PASS** (Boundary 8 + Control 7 + Entity 9) |
+| **전체 마방진 스위트** | **54/54 PASS** (shape 30 + FR-01~05 24) |
+| **품질 게이트** | Boundary **97%** · Control **87~100%** · in-scope **96%** |
+| **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`, `screen/`), `boundary/screen/` (GUI 런처), `src/control/use_cases/` (`resolve_magic_square.py`, `solve_partial_magic_square.py`), `src/entity/rules/`, `src/entity/errors.py`, `.coveragerc` |
+| **Boundary GUI** | `python -m boundary.screen.app` — None Grid → pytest 동일 `INVALID_SIZE` |
+| **미구현·후속** | `ResolveMagicSquareUseCase` success 경로 연결, `ResultFormatter` 분리, NFR-01 anti-diagonal cov |
 | **연습 스캐폴드** | `src/entity/models/user.py`, `tests/entity/test_user.py` (**마방진 범위 밖**) |
 | **conftest SSOT** | G0~G3 fixture, PRD §13 오류 코드·격자 헬퍼 활성화 |
 | **미구성** | `pyproject.toml` 없음 — `python -m pytest` + `requirements.txt` |
-| **다음 GREEN 커밋** | **U-IN-07/08** — `validator.py` blank count → `E_INVALID_BLANK_COUNT` |
+| **다음 작업** | **REFACTOR** — validator 규칙 추출, solver 전략 분리, end-to-end use case 연결 |
 
 ---
 
-*README 갱신: FR-01~05 Full RED 완료 (RPT-14) — Skeleton 24건 assert 전환, shape suite 30/30 회귀 유지.*
+*README 갱신: FR-01~05 GREEN (FG-01~FG-06) · Boundary Screen GUI · RPT-15 — 54/54 PASS, `python -m boundary.screen.app`.*
