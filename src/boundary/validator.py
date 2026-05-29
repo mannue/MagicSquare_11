@@ -14,7 +14,11 @@ class BoundaryValidator:
     """Validates grid shape and input contract before Control/Domain."""
 
     def validate(self, grid: Any) -> ValidationFailure:
-        if grid is None:
+        if (
+            grid is None
+            or len(grid) != 4
+            or not all(len(row) == 4 for row in grid)
+        ):
             return ValidationFailure(
                 success=False,
                 error=BoundaryErrorDetail(
@@ -22,4 +26,4 @@ class BoundaryValidator:
                     message=_INVALID_SIZE_MESSAGE,
                 ),
             )
-        raise NotImplementedError("shape validation beyond grid=None not implemented")
+        raise NotImplementedError("validation beyond shape guard not implemented")
