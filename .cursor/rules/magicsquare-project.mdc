@@ -1,0 +1,47 @@
+# MagicSquare Project Rules
+
+## Project Context
+- Project: MagicSquare
+- Domain: 4x4 magic square generation and validation
+- Language: Python 3.13.13
+- Methodology: Dual-Track TDD with Clean Architecture (ECB)
+
+## Before Coding
+- Review related tests and confirm existing test intent.
+- Verify the target ECB layer and dependency direction first.
+
+## During Coding
+- Keep ECB boundaries intact; do not add cross-layer violations.
+- Always include type hints for function parameters and return values.
+- Follow TDD flow strictly: RED -> GREEN -> REFACTOR.
+
+## After Coding
+- Run pytest for impacted areas and check regressions.
+- Warn if TDD violations are detected (no RED, weakened tests).
+- Keep minimum test coverage at or above 80%.
+---
+description: Project-wide MagicSquare workflow and AI behavior
+alwaysApply: true
+---
+
+# MagicSquare Project Rules
+
+## Project Context
+- Project: MagicSquare
+- Domain: 4x4 magic square generation and validation
+- Language: Python 3.13.13
+- Methodology: Dual-Track TDD with Clean Architecture (ECB)
+
+## Before Coding
+- Review related tests and confirm existing test intent.
+- Verify the target ECB layer and dependency direction first.
+
+## During Coding
+- Keep ECB boundaries intact; do not add cross-layer violations.
+- Always include type hints for function parameters and return values.
+- Follow TDD flow strictly: RED -> GREEN -> REFACTOR.
+
+## After Coding
+- Run pytest for impacted areas and check regressions.
+- Warn if TDD violations are detected (no RED, weakened tests).
+- Keep minimum test coverage at or above 80%.

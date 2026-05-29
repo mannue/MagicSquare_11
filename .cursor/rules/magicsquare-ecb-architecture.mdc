@@ -1,0 +1,49 @@
+# ECB Architecture Rules
+
+## Layer Responsibilities
+- Boundary: external input/output (CLI, API, UI).
+- Control: business use cases and orchestration.
+- Entity: domain models and business rules only.
+
+## Dependency Direction
+- boundary -> control
+- control -> entity
+- entity -> no dependency on boundary or control
+
+## Layer Constraints
+- Boundary must not call Entity directly; route through Control.
+- Control must not depend on Boundary implementation details.
+- Entity must remain pure domain logic with no external I/O.
+
+## Recommended Structure
+- `src/boundary/cli`, `src/boundary/api`
+- `src/control/use_cases`, `src/control/services`
+- `src/entity/models`, `src/entity/rules`
+- `tests/boundary`, `tests/control`, `tests/entity`, `tests/integration`
+---
+description: ECB architecture boundaries and dependency direction
+alwaysApply: true
+---
+
+# ECB Architecture Rules
+
+## Layer Responsibilities
+- Boundary: external input/output (CLI, API, UI).
+- Control: business use cases and orchestration.
+- Entity: domain models and business rules only.
+
+## Dependency Direction
+- boundary -> control
+- control -> entity
+- entity -> no dependency on boundary or control
+
+## Layer Constraints
+- Boundary must not call Entity directly; route through Control.
+- Control must not depend on Boundary implementation details.
+- Entity must remain pure domain logic with no external I/O.
+
+## Recommended Structure
+- `src/boundary/cli`, `src/boundary/api`
+- `src/control/use_cases`, `src/control/services`
+- `src/entity/models`, `src/entity/rules`
+- `tests/boundary`, `tests/control`, `tests/entity`, `tests/integration`

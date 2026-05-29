@@ -1,0 +1,11 @@
+# MagicSquare Cursor Rules Index
+#
+# This file is kept intentionally short.
+# The active rules are split by concern in `.cursor/rules/`.
+#
+# Rule files:
+# - .cursor/rules/magicsquare-project.mdc
+# - .cursor/rules/magicsquare-ecb-architecture.mdc
+# - .cursor/rules/magicsquare-python-code-style.mdc
+# - .cursor/rules/magicsquare-tdd-testing.mdc
+# - .cursor/rules/magicsquare-forbidden.mdc

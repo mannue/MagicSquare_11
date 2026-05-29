@@ -1,0 +1,33 @@
+# Forbidden Patterns
+
+## Do Not Use
+- `print()` in production code.
+ - Reason: noisy test output and poor traceability.
+ - Alternative: `logging` (`debug/info/warning/error`) or `pytest` `caplog`.
+
+- Hard-coded domain constants.
+ - Reason: high change cost and rule duplication.
+ - Alternative: Entity constants, config objects, or named constants module.
+
+- Bare `except:`.
+ - Reason: hides root cause and weakens failure analysis.
+ - Alternative: catch explicit exception types (for example, `except ValueError as exc`) and handle or re-raise properly.
+---
+description: Forbidden patterns and approved alternatives
+alwaysApply: true
+---
+
+# Forbidden Patterns
+
+## Do Not Use
+- `print()` in production code.
+  - Reason: noisy test output and poor traceability.
+  - Alternative: `logging` (`debug/info/warning/error`) or `pytest` `caplog`.
+
+- Hard-coded domain constants.
+  - Reason: high change cost and rule duplication.
+  - Alternative: Entity constants, config objects, or named constants module.
+
+- Bare `except:`.
+  - Reason: hides root cause and weakens failure analysis.
+  - Alternative: catch explicit exception types (for example, `except ValueError as exc`) and handle or re-raise properly.

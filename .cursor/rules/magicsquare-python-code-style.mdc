@@ -1,0 +1,36 @@
+# MagicSquare Python Code Style Rules
+
+## Runtime and Style Baseline
+- Python version: 3.13.13
+- Style guide: PEP 8
+- Maximum line length: 88
+
+## Type Hints and Docstrings
+- Type hints are required for all function parameters and return values.
+- Public functions, methods, and classes must include Google-style docstrings.
+
+## General Quality Rules
+- Prefer explicit names over abbreviations.
+- Keep functions small and focused on one responsibility.
+- Avoid hidden side effects and implicit state mutations.
+---
+description: Python code style and typing requirements
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python Code Style
+
+## Baseline
+- Python version: 3.13.13
+- Follow PEP 8 strictly.
+- Maximum line length: 88.
+
+## Typing and Docs
+- Require type hints for all function parameters and return values.
+- Require Google-style docstrings for all public methods.
+
+## General Guidance
+- Prefer clear names over abbreviations.
+- Keep functions focused and composable.
+- Avoid hidden side effects.
