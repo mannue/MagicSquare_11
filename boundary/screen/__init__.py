@@ -1,0 +1,1 @@
+"""Boundary screen GUI."""
