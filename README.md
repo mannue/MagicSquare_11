@@ -4,7 +4,7 @@
 
 **MagicSquare_XX** 저장소에서 시작하는 것은 4×4 마방진 **도메인 구현**이 아니라, PRD(`docs/PRD_MagicSquare.md`)에 고정된 **입력/출력 계약·도메인 불변식·Dual-Track TDD·ECB(Clean Architecture)** 를 따라 **RED → GREEN → REFACTOR** 루프를 학습하는 TDD 실습입니다.
 
-**현재 단계:** AC-FR-01-01 shape suite RED 완료(Report/08) → **TDD GREEN 진행 중** (`stabilize/green` 브랜치). Track A **G-01**(`grid=None`) 완료, G-02~G-06 대기.
+**현재 단계:** AC-FR-01-01 shape suite RED 완료(Report/08) → **TDD GREEN 진행 중** (`stabilize/green` 브랜치). Track A **G-01**(`grid=None`)·**G-02**(`grid=[]`) 완료, G-03~G-06 대기.
 
 **RED 정의:** 실패하는 테스트를 작성하고, `pytest`로 실행한 뒤, **의도한 요구사항·규칙 위반 때문에** 실패했음을 확인하는 단계입니다. RED 확인 전 production 구현을 시작하지 않습니다.
 
@@ -195,14 +195,14 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 | 커밋 | 범위 | 테스트 수 | 상태 | 구현 요약 |
 |---|---|---:|---|---|
 | **G-01** | Track A — `grid=None` | 8 | ✅ GREEN | `src/boundary/` + `if grid is None: return ValidationFailure` |
-| **G-02** | Track A — `grid=[]` | 2 | 🔴 RED | `len(grid) != 4` → `INVALID_SIZE` |
-| **G-03** | Track A — 3×4 / 4×3 / 5×5 | 4 | 🔴 RED | `rows==4 ∧ all(len(r)==4)` shape guard |
+| **G-02** | Track A — `grid=[]` | 2 | ✅ GREEN | `grid is None or len(grid) != 4` → `INVALID_SIZE` |
+| **G-03** | Track A — 3×4 / 4×3 / 5×5 | 4 | 🔴 RED | `all(len(r)==4)` 열 guard (3×4·5×5는 G-02 row guard로 선통과) |
 | **G-04** | Track A — `[[]]*4` ragged | 2 | 🔴 RED | `len(row) != 4` (G-03 guard로 커버) |
 | **G-05** | Track B — Control + `None` 격리 | 4 (+fixture) | 🔴 ERROR | `src/control/use_cases/resolve_magic_square.py` — validator 선행, `resolve()` 0회 |
 | **G-06** | Track B — 나머지 shape 격리 | 4 | 🔴 ERROR | G-02~G-05 orchestration 재사용 |
 | *(메타)* | 범위/구조 검증 | 7 | ✅ PASS | 커밋 불필요 |
 
-**pytest 현황 (G-01 이후):** Boundary **12 PASS** / **8 FAIL** | Control **1 PASS** / **9 ERROR** | 합계 **13/30 PASS**
+**pytest 현황 (G-02 이후):** Boundary **17 PASS** / **3 FAIL** | Control **1 PASS** / **9 ERROR** | 합계 **18/30 PASS**
 
 ### GREEN 오름차순 전체 목록 (#01 ~ #26)
 
@@ -216,8 +216,8 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 | 06 | A | `TestAcFr0101MessageExactMatch` | `test_none_grid_message_exact_match_prd_8_1` | `None` | (G-01과 동일) | G-01 ✅ |
 | 07 | A | ↑ | `test_invalid_size_message_byte_for_byte_equals_constant` | `None` | (G-01과 동일) | G-01 ✅ |
 | 08 | A | `TestAcFr0101ScopeLimit` | `test_scope_forbidden_error_codes_not_used_as_expected_pass` | `None` | (G-01과 동일) | G-01 ✅ |
-| 09 | A | `TestAcFr0101BoundaryValues` | `test_empty_list_grid_returns_invalid_size_failure` | `[]` | `len(grid) != 4` | G-02 |
-| 10 | A | `TestAcFr0101MessageExactMatch` | `test_empty_list_message_exact_match_prd_8_1` | `[]` | (G-02와 동일) | G-02 |
+| 09 | A | `TestAcFr0101BoundaryValues` | `test_empty_list_grid_returns_invalid_size_failure` | `[]` | `len(grid) != 4` | G-02 ✅ |
+| 10 | A | `TestAcFr0101MessageExactMatch` | `test_empty_list_message_exact_match_prd_8_1` | `[]` | (G-02와 동일) | G-02 ✅ |
 | 11 | A | `TestAcFr0101BoundaryValues` | `test_3x4_grid_returns_invalid_size_failure` | 3×4 | `rows==4 ∧ cols==4` | G-03 |
 | 12 | A | ↑ | `test_4x3_grid_returns_invalid_size_failure` | 4×3 | (G-03과 동일) | G-03 |
 | 13 | A | ↑ | `test_5x5_grid_returns_invalid_size_failure` | 5×5 | (G-03과 동일) | G-03 |
@@ -243,7 +243,7 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 # G-01 ✅
 python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py::TestAcFr0101NormalFailureReturn -v
 
-# G-02
+# G-02 ✅
 python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py -k "empty_list" -v
 
 # G-03
@@ -274,7 +274,7 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 - [x] TC-A-02: `code == "INVALID_SIZE"` — **G-01** ✅
 - [x] TC-A-03: `message == "Grid must be 4x4."` 문자 단위 일치 — **G-01** ✅
 - [ ] TC-A-04: `grid=None` 시 Domain 진입점 0회 호출 — **G-05**
-- [ ] TC-A-05: `grid=[]` → 실패 — **G-02**
+- [x] TC-A-05: `grid=[]` → 실패 — **G-02** ✅
 - [ ] TC-A-06: 3×4 / 4×3 / 5×5 → 실패 — **G-03**, **G-04**
 - [x] TC-A-07: 반환 타입 `ValidationFailure` — **G-01** ✅
 
@@ -295,8 +295,9 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 
 - [x] `docs/defect_list.md` 생성 및 발견 결함 기록
 - [x] DEF-001 해소 — `src/boundary/` 스캐폴드 (**G-01**)
-- [x] DEF-003 부분 해소 — `grid=None` → `INVALID_SIZE` (**G-01**)
-- [ ] DEF-002, DEF-004, DEF-005~012 — **G-02**~**G-06** 대기
+- [x] DEF-003 해소 — `grid=None` → `INVALID_SIZE` (**G-01**)
+- [x] DEF-005 해소 — `grid=[]` → `INVALID_SIZE` (**G-02**)
+- [ ] DEF-002, DEF-004, DEF-006~012 — **G-03**~**G-06** 대기
 - [ ] 모든 결함 수정 후 회귀 테스트 통과 확인 (shape suite 25건 GREEN 목표)
 
 ---
@@ -353,16 +354,16 @@ python -m pytest tests/boundary/test_validator_shape_ac_fr_01_01.py tests/contro
 
 | 항목 | 상태 |
 |---|---|
-| **현재 단계** | AC-FR-01-01 **TDD GREEN 진행 중** — G-01 완료, G-02~G-06 대기 |
-| **브랜치** | `stabilize/green` (`origin` push 완료) |
-| **AC-FR-01-01 shape suite** | **13/30 PASS** (G-01: Boundary `None` 8건 + 메타 5건) |
-| **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`) — `grid=None` 분기만 구현 |
-| **미구현** | `src/control/` (Track B), shape guard `[]`/non-4×4/ragged, Entity rules |
+| **현재 단계** | AC-FR-01-01 **TDD GREEN 진행 중** — G-01·G-02 완료, G-03~G-06 대기 |
+| **브랜치** | `stabilize/green` (`origin` push 완료, 커밋 `2128905`) |
+| **AC-FR-01-01 shape suite** | **18/30 PASS** (G-01: `None` 8건 + G-02: `[]` 2건 + 메타 5건 + Control 메타 1건; Boundary 3건·Control 9건 미통과) |
+| **존재하는 production 코드** | `src/boundary/` (`errors.py`, `validator.py`) — `grid is None`·`len(grid) != 4` 분기 |
+| **미구현** | `src/control/` (Track B), 열 guard(`4×3`·ragged), Entity rules |
 | **연습 스캐폴드** | `src/entity/models/user.py`, `tests/entity/test_user.py` (**마방진 범위 밖**) |
 | **FR-01~05 Skeleton** | `test_u_*_red.py`, `test_d_*_red.py` — 24건 `pytest.fail` (shape suite GREEN 후 진행) |
 | **미구성** | `pyproject.toml` 없음 — `python -m pytest` + `requirements.txt` |
-| **다음 GREEN 커밋** | **G-02** — `grid=[]` → `INVALID_SIZE` (`tests/boundary/...`, 2건) |
+| **다음 GREEN 커밋** | **G-03** — `all(len(r)==4)` 열 guard (`4×3`·`[[]]*4`, 4+2건) |
 
 ---
 
-*README 갱신: AC-FR-01-01 GREEN 로드맵(G-01~G-06, #01~#26) 반영. Tracking Board Status는 RED `RED-CONFIRMED` → GREEN `GREEN` → REFACTOR `DONE`으로 갱신합니다.*
+*README 갱신: AC-FR-01-01 GREEN G-02(`grid=[]`) 완료 반영. Tracking Board Status는 RED `RED-CONFIRMED` → GREEN `GREEN` → REFACTOR `DONE`으로 갱신합니다.*
