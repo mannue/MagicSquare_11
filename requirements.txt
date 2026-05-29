@@ -1,0 +1,4 @@
+# Magic Square 4x4 TDD Practice — dev/test dependencies
+pytest>=8.0,<9
+pytest-cov>=4.0,<8
+pydantic>=2.0,<3
