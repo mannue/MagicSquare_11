@@ -30,6 +30,37 @@ def make_grid(rows: int, cols: int, fill: int = 1) -> list[list[int]]:
     return [[fill for _ in range(cols)] for _ in range(rows)]
 
 
+# --- Report/09 §3.2 G0~G3 (RED placeholder — uncomment for GREEN Arrange) ---
+# G0_COMPLETE = [
+#     [16, 3, 2, 13],
+#     [5, 10, 11, 8],
+#     [9, 6, 7, 12],
+#     [4, 15, 14, 1],
+# ]
+# G1_STEP_A = [
+#     [1, 14, 15, 4],
+#     [12, 0, 6, 9],
+#     [8, 11, 0, 5],
+#     [13, 2, 3, 16],
+# ]
+# G2_REVERSE = [
+#     [16, 3, 2, 13],
+#     [5, 0, 11, 8],
+#     [9, 6, 0, 12],
+#     [4, 15, 14, 1],
+# ]
+# G3_UNSOLVABLE = [
+#     [3, 16, 2, 13],
+#     [5, 0, 11, 8],
+#     [9, 6, 0, 12],
+#     [4, 15, 14, 1],
+# ]
+#
+# @pytest.fixture
+# def grid_g0() -> list[list[int]]:
+#     return [row[:] for row in G0_COMPLETE]
+
+
 @pytest.fixture
 def boundary_validator() -> Any:
     """BoundaryValidator instance (RED: module may not exist yet)."""
