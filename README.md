@@ -183,6 +183,37 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 
 ---
 
+## RED 단계 To-Do 리스트
+
+> 이 체크리스트는 @docs/test_plan.md 기반으로 생성되었습니다.
+> 각 항목은 RED(실패 테스트 작성) 완료 시 체크합니다.
+
+### Track A — UI / Boundary 테스트
+- [ ] TC-A-01: grid=None 입력 → 실패 결과 반환 (Happy Path of Failure)
+- [ ] TC-A-02: code가 정확히 "INVALID_SIZE" 문자열인지 검증
+- [ ] TC-A-03: message가 "Grid must be 4x4." 와 문자 단위 동일한지 검증
+- [ ] TC-A-04: grid=None 시 Domain 진입점 0회 호출 (mock/spy 검증)
+- [ ] TC-A-05: grid=[] 빈 리스트 → 실패 결과 반환
+- [ ] TC-A-06: grid=3×4 크기 불일치 → 실패 결과 반환
+- [ ] TC-A-07: 반환 객체 타입이 지정 실패 결과 구조체인지 검증
+
+### Track B — Domain / Logic 테스트
+- [ ] TC-B-01: resolve()가 None grid를 직접 받지 않음을 격리 검증
+- [ ] TC-B-02: Boundary가 None 분기를 처리 후 resolve() 미호출 확인
+- [ ] TC-B-03: resolve() mock이 호출됐을 경우 테스트 실패 처리
+- [ ] TC-B-04: AC-FR-01-02~05 범위의 케이스는 이 커밋에 포함하지 않음 확인
+
+### 커버리지 목표
+- [ ] Domain Logic: 95%+ (pip install pytest-cov)
+- [ ] Boundary Layer: 85%+
+- [ ] 전체 TOTAL: 90%+
+
+### 결함 목록 연결
+- [x] `docs/defect_list.md` 생성 및 발견 결함 기록
+- [ ] 모든 결함 수정 후 회귀 테스트 통과 확인
+
+---
+
 ## 8. Quality Gates
 
 | 게이트 | 기준 | 출처 |
@@ -209,6 +240,10 @@ RED 단계 착수·확인 전 아래 항목을 점검합니다.
 | 문서 | 역할 |
 |---|---|
 | `docs/PRD_MagicSquare.md` | FR/BR, 입출력 계약, 오류 정책, Dual-Track TDD, Traceability Matrix, TRED-* 후보 — **1차 실행 기준** |
+| `docs/defect_list.md` | RED 단계 결함 등록·추적 (AC-FR-01-01, DEF-001~012) |
+| `docs/test_plan.md` | AC-FR-01-01 테스트 계획서 |
+| `Report/08.MagicSquare_AC-FR-01-01-RED-Test-and-Defect_Report.md` | AC-FR-01-01 RED 테스트·결함 등록 실행 보고 |
+| `Prompt/08.MagicSquare_AC-FR-01-01-RED-Test-and-Defect_Prompt-Transcript.md` | 본 세션 프롬프트·응답 Transcript |
 | `Report/01.MagicSqure_Problem-Definition-Report.md` | STEP 1~5 문제 정의, Invariant, Why Chain, "판정 vs 완성" 관점 |
 | `Report/02.MagicSquare_4x4_Dual-Track-TDD-CleanArchitecture-Report.md` | Dual-Track, Layer Boundary, 입출력 계약, 오류 정책, Invariant 설계 |
 | `Report/03.MagicSquare_CursorRules-Entity-Implementation-Report.md` | 개발 환경, ECB, TDD, pytest, User Entity 스캐폴드 |
